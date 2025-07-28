@@ -66,11 +66,12 @@ ENV NEXT_PUBLIC_ANALYTICS_UMAMI="${NEXT_PUBLIC_ANALYTICS_UMAMI}" \
     NEXT_PUBLIC_UMAMI_WEBSITE_ID="${NEXT_PUBLIC_UMAMI_WEBSITE_ID}"
 
 # Node
-ENV NODE_OPTIONS="--max-old-space-size=8192"
+ENV NODE_OPTIONS="--max-old-space-size=4096"
 
-# 允许构建脚本运行
+# 鍏佽鏋勫缓鑴氭湰杩愯
 ENV NPM_CONFIG_UNSAFE_PERM=true \
-    NPM_CONFIG_ENABLE_SCRIPTS=true
+    NPM_CONFIG_ENABLE_SCRIPTS=true \
+    NODE_OPTIONS="--max-old-space-size=4096"
 
 WORKDIR /app
 
@@ -94,9 +95,12 @@ RUN \
     # Use pnpm for corepack
     && corepack use $(sed -n 's/.*"packageManager": "\(.*\)".*/\1/p' package.json) \
     # Install the dependencies with build scripts enabled
-    && pnpm install --unsafe-perm
+    && pnpm install --unsafe-perm --ignore-scripts=false --enable-scripts=true
 
 COPY . .
+
+# 淇鏋勫缓鑴氭湰闂
+RUN pnpm install --unsafe-perm --ignore-scripts=false --enable-scripts=true
 
 # run build standalone for docker version
 RUN npm run build:docker
