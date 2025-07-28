@@ -68,6 +68,10 @@ ENV NEXT_PUBLIC_ANALYTICS_UMAMI="${NEXT_PUBLIC_ANALYTICS_UMAMI}" \
 # Node
 ENV NODE_OPTIONS="--max-old-space-size=8192"
 
+# 允许构建脚本运行
+ENV NPM_CONFIG_UNSAFE_PERM=true \
+    NPM_CONFIG_ENABLE_SCRIPTS=true
+
 WORKDIR /app
 
 COPY package.json pnpm-workspace.yaml ./
@@ -89,8 +93,8 @@ RUN \
     && corepack enable \
     # Use pnpm for corepack
     && corepack use $(sed -n 's/.*"packageManager": "\(.*\)".*/\1/p' package.json) \
-    # Install the dependencies
-    && pnpm i
+    # Install the dependencies with build scripts enabled
+    && pnpm install --unsafe-perm
 
 COPY . .
 
